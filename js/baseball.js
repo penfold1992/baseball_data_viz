@@ -6,10 +6,9 @@
 function init_baseball(data){
     "use strict"; // strict mode declaration
     
-    var margin = 75,
-        width = 1400 - margin,
-        height = 600 - margin;
-    debugger;
+    var margin = 50,
+        width = 950 - margin,
+        height = 400 - margin;
     d3.select("body")
       .append("h2")
       .style("width", width + margin + 'px')
@@ -90,7 +89,7 @@ function init_baseball(data){
       .attr("cy", function(d) {
           return y_scale(d["HR"]);
       })
-      .attr('r', 5);  
+      .attr('r', 4);  
 
     // bin data
     var histo_layout = d3.layout.histogram()
@@ -127,9 +126,9 @@ function init_baseball(data){
     var rect = d3.select('svg')
                  .insert('rect')
                  .attr('x', 100)
-                 .attr('y', 50)
-                 .attr('width', 400)
-                 .attr('height', 100)
+                 .attr('y', 20)
+                 .attr('width', 338)
+                 .attr('height', 70)
                  .attr('opacity', 0.5)
                  .attr('fill', '#ffc');
     var text = d3.select('svg')
@@ -137,19 +136,19 @@ function init_baseball(data){
                  .attr('class', 'call-out-text')
                  .append('text')
                  .attr('x', 110)
-                 .attr('y', 70);
+                 .attr('y', 32);
     
     text.text('This dataset contains 1157 entries. ' +
               'The weight of the baseball players resembles ' +
               'a normal distribution.')
-        .call(wrap, 390);
+        .call(wrap, 335);
     
     // Martini Glass neck
     setTimeout(function(){
         data_average(histo_agg, y_axis, x_axis, 'mean_HR');
         text.text('The home-run mean suggests that there is a positive ' +
                   'correlation between weight and the number of home-runs.')
-            .call(wrap, 390);
+            .call(wrap, 335);
     }, 4000);
     
     setTimeout(function(){
@@ -167,9 +166,9 @@ function init_baseball(data){
                   'home-run, the chance of them hitting at the plate is '+
                   'lower too. This may play a key role in tactical ' +
                   'decisions depending on the nature of the team\'s play.')
-            .call(wrap, 390);
+            .call(wrap, 335);
     }, 8000);
-
+    
     
     // Martini Glass bowl
     setTimeout(function(){
@@ -342,16 +341,16 @@ function add_buttons(width, margin){
                              .attr("class", "home_run")
                              .style("width", (width + margin)/2 + 'px');
     
-    var hr_buttons = [['Home-run Exploded', 'hr_explode'],
-                      ['Home-run Mean','hr_mean'],
-                      ['Home-run Median','hr_median']];
+    var hr_buttons = [['Home-run<br>Exploded', 'hr_explode'],
+                      ['Home-run<br>Mean','hr_mean'],
+                      ['Home-run<br>Median','hr_median']];
         
     hr_buttons.forEach(function(d, i){
         home_run.append("button")
                 .attr("class", "btn btn-primary " + d[1])
                 .style({"background-color": "#FFFFFF",
                         "border-color": "#FFFFFF"})
-                .text(d[0]);
+                .html('<p>' + d[0] + '</p>');
     });
     
     // Batting Average
@@ -359,16 +358,16 @@ function add_buttons(width, margin){
                                 .attr("class", "batting_avg")
                                 .style("width", (width + margin)/2 + 'px');
     
-    var batting_buttons = [['Batting Average Exploded','avg_explode'],
-                           ['Batting Average Mean','avg_mean'],
-                           ['Batting Average Median','avg_median']];
+    var batting_buttons = [['Batting Average<br>Exploded','avg_explode'],
+                           ['Batting Average<br>Mean','avg_mean'],
+                           ['Batting Average<br>Median','avg_median']];
                            
     batting_buttons.forEach(function(d){
         batting_avg.append("button")
                    .attr("class", "btn btn-primary " + d[1])
                    .style({"background-color": "#FFFFFF",
                            "border-color": "#FFFFFF"})
-                   .text(d[0]);
+                   .html('<p>' + d[0] + '</p>');
     });
 }
 
