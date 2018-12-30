@@ -24,8 +24,6 @@ g .tick line {
 }
 
 svg circle{
-  stroke: #377eb8;
-  fill: #377eb8;
   fill-opacity: 0.3;
 }
 
@@ -42,6 +40,6 @@ svg circle{
   margin-right: 5px;
   font-size: 10px;
 }
-.btn, p{
+.btn p{
   margin-bottom: 0px;
 }
