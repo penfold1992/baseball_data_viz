@@ -1,0 +1,47 @@
+h1{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+h2 {
+  text-align: center;
+}
+
+path {
+  fill: none;
+  stroke: black;
+  stroke-width: 2px;
+}
+
+.axis {
+  font-family: arial;
+  font-size: 0.6em;
+}
+
+g .tick line {
+  fill: none;
+  stroke: black;
+}
+
+svg circle{
+  stroke: #377eb8;
+  fill: #377eb8;
+  fill-opacity: 0.3;
+}
+
+.user-driven-buttons, .home_run, .batting_avg{
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.call-out-text{
+  font-size: 11px;
+}
+
+.btn{
+  margin-right: 5px;
+  font-size: 10px;
+}
+.btn, p{
+  margin-bottom: 0px;
+}

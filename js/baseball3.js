@@ -1,5 +1,3 @@
-/*jshint esversion: 6 */
-
 /*
  * Main function initiated within index.html. 
  * Produces the data driven visualization.
@@ -23,12 +21,12 @@ function init_baseball(data){
     add_buttons(width, margin);
     
     // SVG element
-    d3.select("body")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append('g')
-      .attr('class', 'graph');
+    var svg = d3.select("body")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append('g')
+                .attr('class', 'graph');
     
     // Bind data
     d3.select('svg')
@@ -36,12 +34,12 @@ function init_baseball(data){
       .data(data)
       .enter()
       .append("circle")
-      .attr("transform", "translate(0," + (0 - margin.bottom) + ")");
+      .attr("transform", "translate(0," + (0 - margin.bottom) + ")")
       
     
     // Create x axis for graph
     var x_extent = d3.extent(data, function(d) {
-        return d.weight;
+        return d['weight'];
     });
     x_extent[0] = x_extent[0] - 5;
     x_extent[1] = x_extent[1] + 5;
@@ -64,7 +62,7 @@ function init_baseball(data){
     // text label for the x-axis
     d3.select("svg")
       .append("text")
-      .text("Weight (in lbs)")
+      .text("Weight")
       .attr("class", "x-axis-text")
       .attr("y", height)
       .attr("x", ((width + margin.left + margin.right) / 2))
@@ -73,12 +71,12 @@ function init_baseball(data){
     
     // y domains
     var hr_max = d3.max(data, function(d) {
-        return d.HR;
+        return d['HR'];
     });
     var avg_max = d3.max(data, function(d) {
-        return d.avg;
+        return d['avg'];
     });
-    avg_max = Math.ceil(avg_max * 100) / 100;
+    avg_max = Math.ceil(avg_max * 100) / 100
     
     // Create y axis for Home Run
     var y_scale = d3.scale.linear()
@@ -102,15 +100,15 @@ function init_baseball(data){
     // Draw initial graph
     d3.selectAll("circle")
       .attr("cx", function(d) {
-          return x_scale(+d.weight);
+          return x_scale(+d["weight"]);
       })
       .attr("cy", function(d) {
-          return y_scale(d.HR);
+          return y_scale(d["HR"]);
       })
       .attr('r', 4)
       .attr('fill', '#67a9cf')
       .attr('stroke', '#67a9cf')
-      .attr('fill-opacity', 0.3);
+      .attr('fill-opacity', 0.3)
 
     // text label for the y-axis
     d3.select("svg")
@@ -154,44 +152,26 @@ function init_baseball(data){
     // bin data
     var histo_layout = d3.layout.histogram()
                          .bins(x_scale.ticks(10))
-                         .value(function(d){return d.weight;});
+                         .value(function(d){return d['weight']});
     
     var histo_bins = histo_layout(data);
     var histo_agg = histo_nest(histo_bins);                   
     
     // link functions to buttons
-    var btn_functions = [function(){
-                             call_out_text_change('hr_explode');
-                             data_exploded(data, y_axis, 
-                                           x_axis, 'HR',
-                                           histo_agg);
-                         },
-                         function(){
-                             call_out_text_change('hr_mean');
-                             data_average(histo_agg, y_axis, 
-                                          x_axis, 'hr_mean');
-                         },
-                         function(){
-                             call_out_text_change('hr_median');
-                             data_average(histo_agg, y_axis, 
-                                           x_axis, 'hr_median');
-                         },
-                         function(){
-                             call_out_text_change('avg_explode');
-                             data_exploded(data, y_axis, 
-                                           x_axis, 'avg',
-                                           histo_agg);
-                         },
-                         function(){
-                             call_out_text_change('avg_mean');
-                             data_average(histo_agg, y_axis, 
-                                          x_axis, 'avg_mean');
-                         },
-                         function(){
-                             call_out_text_change('avg_median');
-                             data_average(histo_agg, y_axis, 
-                                          x_axis, 'avg_median');
-                         }];
+    var btn_functions = [function(){return data_exploded(data, y_axis, 
+                                                         x_axis, 'HR',
+                                                         histo_agg)},
+                         function(){return data_average(histo_agg, y_axis, 
+                                                        x_axis, 'hr_mean')},
+                         function(){return data_average(histo_agg, y_axis, 
+                                                        x_axis, 'hr_median')},
+                         function(){return data_exploded(data, y_axis, 
+                                                         x_axis, 'avg',
+                                                         histo_agg)},
+                         function(){return data_average(histo_agg, y_axis, 
+                                                        x_axis, 'avg_mean')},
+                         function(){return data_average(histo_agg, y_axis, 
+                                                        x_axis, 'avg_median')}];
     
     d3.select('.hr_explode').on("click", btn_functions[0]);    
     d3.select('.hr_mean').on("click", btn_functions[1]);
@@ -203,67 +183,75 @@ function init_baseball(data){
     
     // Create call-out boxes
     // insert a yellow rect beneath the text, to represent the bounding box
-    d3.select('svg')
-      .insert('rect')
-      .attr('x', 80)
-      .attr('y', 20)
-      .attr('width', 338)
-      .attr('height', 70)
-      .attr('opacity', 0.5)
-      .attr('fill', '#ffc');
+    var rect = d3.select('svg')
+                 .insert('rect')
+                 .attr('x', 100)
+                 .attr('y', 20)
+                 .attr('width', 338)
+                 .attr('height', 70)
+                 .attr('opacity', 0.5)
+                 .attr('fill', '#ffc');
     var text = d3.select('svg')
-             .append('g')
-             .attr('class', 'call-out-text')
-             .append('text')
-             .attr("dy", "1em")
-             .attr('x', 90)
-             .attr('y', 32)
-             .attr('fill', '#000000');
-
-    call_out_text_change('hr_explode',
-                         'This dataset contains 1157 entries. ' +
-                         'The weight of the baseball players resembles ' +
-                         'a normal distribution.');
+                 .append('g')
+                 .attr('class', 'call-out-text')
+                 .append('text')
+                 .attr('x', 110)
+                 .attr('y', 32);
+    
+    text.text('This dataset contains 1157 entries. ' +
+              'The weight of the baseball players resembles ' +
+              'a normal distribution.')
+        .call(wrap, 335);
     
     // Martini Glass neck
     setTimeout(function(){
         data_average(histo_agg, y_axis, x_axis, 'hr_mean');
-        call_out_text_change('hr_mean',
-                             'The home-run mean suggests that there ' +
-                             'is a positive correlation between weight ' +
-                             'and the number of home-runs.');
+        text.text('The home-run mean suggests that there is a positive ' +
+                  'correlation between weight and the number of home-runs.')
+            .call(wrap, 335);
     }, 4000);
     
     
     setTimeout(function(){
         data_average(histo_agg, y_axis, x_axis, 'avg_mean');
-        call_out_text_change('avg_mean',
-                             'However, there is a negative correlation ' +
-                             'between the weight and batting average. ' +                 
-                             'This would suggest that whilst weight may ' +       
-                             'indicate a high potential of a home-run, ' +      
-                             'the chance of them hitting at the plate is ' +      
-                             'lower too. This may play a key role in ' +          
-                             'tactical decisions depending on the nature ' +      
-                             'of the team\'s play.');
+        rect.transition()
+            .duration(1000)
+            .attr('transform', 'translate(0, 220)');
+        text.transition()
+            .duration(1000)
+            .attr('transform', 'translate(0, 220)');
+        
+        text.text('However, there is a negative correlation between the ' +
+                  'weight and batting average. This would suggest that ' +
+                  'whilst weight may indicate a high potential of a ' +
+                  'home-run, the chance of them hitting at the plate is '+
+                  'lower too. This may play a key role in tactical ' +
+                  'decisions depending on the nature of the team\'s play.')
+            .call(wrap, 335);
     }, 8000);
     
     
     // Martini Glass bowl
     setTimeout(function(){
         // remove text elements
-        //rect.transition()
-        //    .duration(500)
-        //    .attr('opacity', 0);
-        //text.selectAll('tspan')
-        //    .transition()
-        //    .duration(500)
-        //    .style("fill","white");
+        rect.transition()
+            .duration(500)
+            .attr('opacity', 0);
+        text.selectAll('tspan')
+            .transition()
+            .duration(500)
+            .style("fill","white");
+        rect.transition()
+            .delay(500)
+            .remove()
+        text.transition()
+            .delay(500)
+            .remove()
         
         // enable buttons
         d3.selectAll('.btn')
           .filter(function() {
-            return !this.classList.contains('avg_mean');
+            return !this.classList.contains('avg_mean')
           })
           .transition()
           .duration(1000)
@@ -297,28 +285,28 @@ function histo_nest(data){
     var bin = {};
     
     data.forEach(function(d){
-        bin[d.x + 5] = {};
+        bin[d['x'] + 5] = {}
             
-        bin[d.x + 5].range = d3.min(d, function(b){return b.weight;}) + 
-                                " - " +
-                                d3.max(d, function(b){return b.weight;});
+        bin[d['x'] + 5]['range'] = d3.min(d, function(b){return b['weight'];})
+                                   + " - " +
+                                   d3.max(d, function(b){return b['weight'];});
         
-        bin[d.x + 5].count = d.length;
+        bin[d['x'] + 5]['count'] = d.length;
         
-        bin[d.x + 5].hr_mean = d3.mean(d, function(b){
-            return b.HR;
+        bin[d['x'] + 5]['hr_mean'] = d3.mean(d, function(b){
+            return b['HR'];
         });
         
-        bin[d.x + 5].hr_median = d3.median(d, function(b){
-            return b.HR;
+        bin[d['x'] + 5]['hr_median'] = d3.median(d, function(b){
+            return b['HR'];
         });
         
-        bin[d.x + 5].avg_mean = d3.mean(d, function(b){
-            return b.avg;
+        bin[d['x'] + 5]['avg_mean'] = d3.mean(d, function(b){
+            return b['avg'];
         });
         
-        bin[d.x + 5].avg_median = d3.median(d, function(b){
-            return b.avg;
+        bin[d['x'] + 5]['avg_median'] = d3.median(d, function(b){
+            return b['avg'];
         });
     });
     
@@ -352,19 +340,19 @@ function data_average(nested_data, y_axis, x_axis, average_type){
       .call(y_axis);
     
     var exploded_view = d3.select('.btn-warning').classed('hr_explode') || 
-                        d3.select('.btn-warning').classed('avg_explode');
+                        d3.select('.btn-warning').classed('avg_explode')
     if(exploded_view){
         // dealing with exploded data points
         
         // move exploded points to average by buckets
         function y_type_avg(d){
-            var r = nested_data[closest_bucket(d.weight)];
+            var r = nested_data[closest_bucket(d['weight'])];
 
             return new_scale(r[average_type]);
         }
         
         function x_type_avg(d){ 
-            return x_axis.scale()(closest_bucket(d.weight));
+            return x_axis.scale()(closest_bucket(d['weight']));
         }
 
         d3.select('svg')
@@ -390,30 +378,30 @@ function data_average(nested_data, y_axis, x_axis, average_type){
         
         // remove points to replace them by the average dots
         nested_data_list = Object.keys(nested_data).map(function(key){
-            nested_data[key].x = +key;
+            nested_data[key]["x"] = +key;
             return nested_data[key];
         });
     }
     
     var circle = d3.select('svg')
                    .selectAll('circle')
-                   .data(nested_data_list);
+                   .data(nested_data_list)
     
     circle.transition()
           .duration(function(){
               if(exploded_view){
-                  return 0;
+                  return 0
               }
               else{
-                  return 1000;
+                  return 1000
               }
           })
           .delay(function(){
               if(exploded_view){
-                  return 1000;
+                  return 1000
               }
               else{
-                  return 0;
+                  return 0
               }
           })
           .attr("cx", function(d) {
@@ -472,7 +460,7 @@ function data_average(nested_data, y_axis, x_axis, average_type){
           }else{
               return 'Batting Average';
           }
-      });
+      })
       
     // change chart title
     d3.select("h2")
@@ -489,7 +477,7 @@ function data_average(nested_data, y_axis, x_axis, average_type){
             default:
               return 'Error';
           }
-      });
+      })
 
     // change all buttons back to normal
     d3.selectAll('.btn')
@@ -517,37 +505,37 @@ function data_average(nested_data, y_axis, x_axis, average_type){
 function data_exploded(data, y_axis, x_axis, y_data_explosion, nested_data){
     // dealing with data in average views
     var exploded_view = d3.select('.btn-warning').classed('hr_explode') || 
-                        d3.select('.btn-warning').classed('avg_explode');
-    
-    var average_type = '';
-    
-    if(!exploded_view){        
+                        d3.select('.btn-warning').classed('avg_explode')
+                        
+    if(!exploded_view){
+        debugger;
+        
         if(d3.select('.btn-warning').classed('hr_mean')){
-            average_type = 'hr_mean';
+            var average_type = 'hr_mean'
         }
         else if(d3.select('.btn-warning').classed('hr_median')){
-            average_type = 'hr_median';
+            var average_type = 'hr_median'
         }
         else if(d3.select('.btn-warning').classed('avg_mean')){
-            average_type = 'avg_mean';
+            var average_type = 'avg_mean'
         }
         else if(d3.select('.btn-warning').classed('avg_median')){
-            average_type = 'avg_median';
+            var average_type = 'avg_median'
         }
 
         function x_type_avg(d){ 
-            return x_axis.scale()(closest_bucket(d.weight));
+            return x_axis.scale()(closest_bucket(d['weight']));
         }
         
         function y_type_avg(d){
-            var r = nested_data[closest_bucket(d.weight)];
+            var r = nested_data[closest_bucket(d['weight'])];
                         
             return y_axis.scale()(r[average_type]);
         }
 
         var circle = d3.select('svg')
                        .selectAll('circle')
-                       .data(data);
+                       .data(data)
                        
         
         circle.enter()
@@ -594,7 +582,7 @@ function data_exploded(data, y_axis, x_axis, y_data_explosion, nested_data){
     }
     
     function x_data_exploded(d){ 
-        return x_axis.scale()(d.weight);
+        return x_axis.scale()(d['weight']);
     }
 
     d3.select('svg')
@@ -648,7 +636,7 @@ function data_exploded(data, y_axis, x_axis, y_data_explosion, nested_data){
           }else{
               return 'Batting Average';
           }
-      });
+      })
     
     // change chart title
     d3.select("h2")
@@ -658,7 +646,7 @@ function data_exploded(data, y_axis, x_axis, y_data_explosion, nested_data){
           }else{
               return 'Baseball: Weight vs Batting Average';
           }
-      });
+      })
       
     // change all buttons back to normal
     d3.selectAll('.btn')
@@ -733,89 +721,24 @@ function add_buttons(width, margin){
 
 
 /*
- * change the call out text based on the view
- * @param {string} the class value of the button used to trigger the change
- */
-function call_out_text_change(view, custom_text=""){    
-    var rect = d3.select('rect');
-    var text_box = d3.select('.call-out-text')
-                     .select('text');
-    
-    var translations = {'hr_explode' : 'translate(0, 0)', 
-                        'hr_mean'    : 'translate(0, 0)', 
-                        'hr_median'  : 'translate(0, 60)', 
-                        'avg_explode': 'translate(0, 240)', 
-                        'avg_mean'   : 'translate(0, 220)', 
-                        'avg_median' : 'translate(0, 220)'};
-    
-    var text = {'hr_explode' : "This dataset contains 1157 entries. " +           
-                               "The weight of the baseball players " +  
-                               "resembles a normal distribution.", 
-                'hr_mean'    : "The home-run mean suggests that there " +         
-                               "is a positive correlation between " +  
-                               "weight and the number of home-runs. " + 
-                               "The 245lb Stefan Wever is an outlier, " +
-                               "with 0 Home Runs and a 0 Batting Average.",
-                'hr_median'  : "Home-run median contains a lot less " +
-                               "insight. The animation between this view " +
-                               "and the Home-Run exploded view shows the " +
-                               "majority of data lies between 0 and 50 " +
-                               "home-runs.", 
-                'avg_explode': "Here we can see a clear band form between " +
-                               "0.2 and 0.3 batting average.", 
-                'avg_mean'   : "There is a negative correlation " +
-                               "between the weight and batting average. " +
-                               "This is in contrast to the positive " +
-                               "correlation as seen in the Home-Run " +
-                               "mean view.",
-                'avg_median' : "The batting average median shows a much " +
-                               "weaker correlation but it clearly shows " +
-                               "the median drop after 220 lbs."};
-        
-    rect.transition()
-        .duration(1000)
-        .attr('transform', translations[view])
-        .attr('opacity', '0.5');
-
-    if(custom_text != ""){
-        text_box.text(custom_text)
-                .call(wrap, 335);
-        text_box.transition()
-                .duration(1000)
-                .attr('transform', translations[view]);
-    }else{
-        text_box.text(text[view])
-                .call(wrap, 335);
-        text_box.transition()
-                .duration(1000)
-                .attr('transform', translations[view]);
-    }
-
-    // determine height
-    var lines = text_box.selectAll('tspan')[0].length;
-    rect.attr('height', lines + 'em');
-}
-
-
-/*
  * tooltip data for exploded views
  * @param {d3.d3-request} data Data provided by a CSV or TSV d3 call
  */
 function tooltip_explode(data){
-    return "<table>" +
-              "<tr><td>Baseball Player:</td>" +
-                  "<td>" + data.name + "</td></tr>" +
-              "<tr><td>Handedness:</td>" +
-                  "<td>" + data.handedness + "</td></tr>" +
-              "<tr><td>Height (inches):</td>" +
-                  "<td>" + data.height + "</td></tr>" +
-              "<tr><td>Weight (lbs):</td> " +
-                  "<td>" + data.weight + "</td></tr>" +
-              "<tr><td>Batting Average:</td>" +
-                  "<td>" + data.avg + "</td></tr>" +
-              "<tr><td>Home-Runs:</td>" +
-                  "<td>" + data.HR + "</td></tr>" +
-           "</table>";
+    return "<table>                                                            \
+              <tr><td>Baseball Player:</td>                                    \
+                  <td>" + data.name + "</td></tr>                              \
+              <tr><td>Handedness:</td>                                         \
+                  <td>" + data.handedness + "</td></tr>                        \
+              <tr><td>Height:</td>                                             \
+                  <td>" + data.height + "</td></tr>                            \
+              <tr><td>Weight:</td>                                             \
+                  <td>" + data.weight + "</td></tr>                            \
+              <tr><td>Batting Average:</td>                                    \
+                  <td>" + data.avg + "</td></tr>                               \
+              <tr><td>Home-Runs:</td>                                          \
+                  <td>" + data.HR + "</td></tr>                                \
+            </table>";
 }
 
 
@@ -824,21 +747,20 @@ function tooltip_explode(data){
  * @param {dict} nested_data Data provided by the histo_nest function.
  */
 function tooltip_average(data){
-    return "<table>" +
-              "<tr><td>Weight Range (lbs):</td>" +
-                  "<td>" + data.x + "</td></tr>" +
-              "<tr><td>Count:</td>" +
-                  "<td>" + data.count + "</td></tr>" +
-              "<tr><td>Home-run Mean:</td>" +
-                  "<td>" + Math.round(data.hr_mean*10)/10 + "</td></tr>" +
-              "<tr><td>Home-run Median:</td>" +
-                  "<td>" + Math.round(data.hr_median*10)/10+ "</td></tr>" +
-              "<tr><td>Batting Average Mean:</td>" +
-                  "<td>" + Math.round(data.avg_mean*1000)/1000 + "</td></tr>" +
-              "<tr><td>Batting Average Median:</td>" +                             
-                  "<td>" + Math.round(data.avg_median*1000)/1000 + "</td>" +
-              "</tr>" +
-           "</table>";
+    return "<table>                                                            \
+              <tr><td>Weight Range:</td>                                       \
+                  <td>" + data.x + "</td></tr>                                 \
+              <tr><td>Count:</td>                                              \
+                  <td>" + data.count + "</td></tr>                             \
+              <tr><td>Home-run Mean:</td>                                      \
+                  <td>" + Math.round(data.hr_mean*10) / 10 + "</td></tr>       \
+              <tr><td>Home-run Median:</td>                                    \
+                  <td>" + Math.round(data.hr_median*10) / 10+ "</td></tr>      \
+              <tr><td>Batting Average Mean:</td>                               \
+                  <td>" + Math.round(data.avg_mean*1000) / 1000 + "</td></tr>  \
+              <tr><td>Batting Average Median:</td>                             \
+                  <td>" + Math.round(data.avg_median*1000) / 1000 + "</td></tr>\
+            </table>";
 }
 
 
@@ -858,7 +780,7 @@ function wrap(text, width) {
         lineHeight = 1.1, // ems
         x = text.attr("x"),
         y = text.attr("y"),
-        dy = 0,
+        dy = 0 //parseFloat(text.attr("dy")),
         tspan = text.text(null)
                     .append("tspan")
                     .attr("x", x)
